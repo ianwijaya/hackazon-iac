@@ -20,7 +20,8 @@
       - php5.6
       - php5.6-mysql
       - php5.6-xml
-      - php5.6-bcmath 
+      - php5.6-bcmath
+      - php5.6-mbstring 
       - libapache2-mod-php5.6
     notify: 
     - service_handler
