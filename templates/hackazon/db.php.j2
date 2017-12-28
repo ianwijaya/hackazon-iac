@@ -1,12 +1,12 @@
 <?php
 return array (
-  'default' => 
+  'default' =>
   array (
-    'user' => 'hackazon',
+    'user' => '{{ mysql_user }}',
     'password' => '{{ mysql_password }}',
     'driver' => 'PDOV',
-    'connection' => "mysql:host={{ mysql_host }};port=3306;dbname=hackazon",
-    'db' => 'hackazon',
+    'connection' => "mysql:host={{ mysql_host }};port=3306;dbname={{ db_name }}",
+    'db' => '{{ db_name }}',
     'host' => '{{ mysql_host }}',
     'port' => '3306',
   ),

@@ -1,0 +1,27 @@
+  - name: create Resource Group
+    azure_rm_resourcegroup:
+      name: '{{ az_rg }}'
+      location: '{{ az_loc }}'
+      state: present
+      profile: 'default'
+      tags:
+         purpose: demo
+
+  - name: Create Virtual Network
+    azure_rm_virtualnetwork:
+      resource_group: '{{ az_rg }}'
+      name: hackazon_vn
+      address_prefixes: '{{ virtual_network }}'
+
+  - name: Add Subnet
+    azure_rm_subnet:
+      resource_group: '{{ az_rg }}'
+      virtual_network: hackazon_vn
+      name: hackazon_subnet
+      address_prefix: '{{ svr_subnet }}'
+      
+  - name: create storage account
+    azure_rm_storageaccount:
+       resource_group: '{{ az_rg }}'
+       name:  '{{ storage_account }}'
+       account_type: Standard_LRS

@@ -1,0 +1,55 @@
+---
+- hosts: 'localhost'
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  tasks:
+    - include_tasks: azure-env-res-creation.yml
+    - include_tasks: azure-db-res-creation.yml
+      when: local_db=='no'
+    - include_tasks: azure-ws-res-creation.yml
+    - meta: refresh_inventory
+    - debug: var=hostvars[inventory_hostname]
+# dynamic inventory
+# DB server deployment
+- hosts: Type_dbsvr
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  tasks:
+    - include_tasks: hackazon-dbsvr.yml
+      when: local_db=='no'
+
+
+- hosts: Enum_websvr1
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+  vars_files:
+   - vars.yml
+  tasks:
+  - include_tasks: hackazon-dbsvr.yml
+    when: local_db=='yes'
+
+
+#Web Servers Deployment
+- hosts: Type_websvr
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  tasks:
+    - set_fact: #override vars_files variables only for Azure deployment.
+        mysql_host: "{{ hostvars['localhost']['mysql_host'] }}"
+      when: local_db=='no'
+    - debug: var=mysql_host
+    - include_tasks: hackazon-websvr.yml

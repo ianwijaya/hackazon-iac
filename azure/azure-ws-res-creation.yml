@@ -1,0 +1,65 @@
+--- #deploy web servers
+  - name: Create Web Svr Security Groups
+    azure_rm_securitygroup:
+      resource_group: '{{ az_rg }}'
+      name: hackazon_web_sg
+      rules:
+       - name: 'ssh'
+         protocol: Tcp
+         destination_port_range: '22'
+         access: Allow
+         direction: Inbound
+         priority: '1001'
+       - name: 'web'
+         protocol: Tcp
+         destination_port_range: '80'
+         access: Allow
+         direction: Inbound
+         priority: '1002'
+       - name: 'ssl'
+         protocol: Tcp
+         destination_port_range: '443'
+         access: Allow
+         direction: Inbound
+         priority: '1003'
+  - name: Create public IP
+    azure_rm_publicipaddress:
+      resource_group: '{{ az_rg }}'
+      allocation_method: Static
+      name: 'hackazon_web_pub_ip_{{ item }}'
+    with_sequence: start=1 end={{ desired_web_instance }} stride=1
+
+  - name: Create NIC
+    azure_rm_networkinterface:
+       resource_group: '{{ az_rg }}'
+       name: 'hackazon_web_nic_{{ item }}'
+       virtual_network: hackazon_vn
+       subnet: hackazon_subnet
+       public_ip_name: 'hackazon_web_pub_ip_{{ item }}'
+       security_group: hackazon_web_sg
+    with_sequence: start=1 end={{ desired_web_instance }} stride=1
+
+  - name: Create Web VM
+    azure_rm_virtualmachine:
+       resource_group: '{{ az_rg }}'
+       name: 'websvr{{ item }}'
+       vm_size: Basic_A0
+       admin_username: ansible
+       admin_password: '{{ admin_password }}'
+       storage_account: '{{ storage_account }}'
+       ssh_password_enabled: True
+       short_hostname: 'az-websvr{{ item }}'
+       ssh_public_keys:
+        - path: /home/ansible/.ssh/authorized_keys
+          key_data: '{{ ssh_key }}'
+       network_interfaces: 'hackazon_web_nic_{{ item }}'
+       tags:
+          Type: 'websvr'
+          Enum: 'websvr{{ item }}'
+       image:
+        offer: 'UbuntuServer'
+        publisher: 'Canonical'
+        sku: '16.04-LTS'
+        version: 'latest'
+    register: "vm_output_web_{{ item }}"
+    with_sequence: start=1 end={{ desired_web_instance }} stride=1
