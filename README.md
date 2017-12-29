@@ -47,8 +47,7 @@ All IPs has to be reachable from control host
 <your dbsvr IP goes here> #this can be same websvr IP
 ```
 
-2. Modify vars.yml. Only change "Global" and "On-prem" configuration section
-you will need to change mysql_host to DB IP if DB and Web are not installed in the same svr.
+2. Modify vars.yml. You only need to change "Global" and "On-prem" configuration section. "mysql_host" need to be changed to DB IP if DB and Web are not installed on the same server.
 
 3. Play it
 ```
@@ -61,8 +60,11 @@ Credentials need to be provided. While there are many ways to do this, we're gon
 There are 4 parameters need to be supplied:
 
 *client_id: Azure portal -> Azure Active Directory -> App Registration -> New (choose Web/API and enter arbitrary sing-on URL) -> copy application ID and use it as client_id
+
 *secret: From that menu, choose "Keys" menu -> fill Description and "never expires" -> save (copy the key right away or you will lose it ) -> use it as secret
+
 *tenant: Azure portal -> Azure Active Directory -> Properties -> Copy "Directory ID" as tenant
+
 *subscription_id: Azure portal -> more services , type subscription -> copy subscription ID
 
 *Don't forget to add your apps to a role by navigating to Subscription  -> IAM -> Add -> Role : Contributor, then type your app name on select box, then hit save.
@@ -78,7 +80,8 @@ subscription_id=xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx
 
 Save it to "~/.azure/credentials" (it has to be in home directory, pls create if it doesn't exist).
 
-Refer to this for more detail explanation : https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
+Refer to this for more detail explanation: 
+https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
 
 ### Installing
 
