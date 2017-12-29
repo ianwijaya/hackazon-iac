@@ -1,0 +1,48 @@
+- hosts: 'localhost'
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  tasks:
+  - name: deploy F5 WAAP thru ARM template
+    azure_rm_deployment:
+       state: present
+       resource_group_name: '{{ az_rg }}'
+       location: '{{ az_loc }}'
+       template_link: https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/supported/standalone/1nic/existing_stack/PAYG/azuredeploy.json
+       parameters:
+          adminUsername:
+              value: f5admin
+          adminPassword:
+              value: "{{ admin_password }}"
+          dnsLabel:
+              value: "f5waap"
+          instanceName:
+              value: "f5waap"
+          instanceType:
+              value: "Standard_DS2_v2"
+          imageName:
+              value: "Best"
+          bigIpVersion:
+              value: "13.0.0300"
+          licensedBandwidth:
+              value: "25m"
+          vnetName:
+              value: "hackazon_vn"
+          vnetResourceGroupName:
+              value: "{{ az_rg }}"
+          mgmtSubnetName:
+              value: "hackazon_subnet"
+          mgmtIpAddress:
+              value: "10.128.10.245"
+          avSetChoice:
+              value: "CREATE_NEW"
+          ntpServer:
+              value: "0.pool.ntp.org"
+          timeZone:
+              value: "GMT+7"
+          restrictedSrcAddress:
+              value: "*"
+          allowUsageAnalytics:
+              value: "Yes"
+    register: azurewaap
+  - debug : var=azurewaap

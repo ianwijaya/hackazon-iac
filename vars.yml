@@ -1,8 +1,8 @@
 ---
+#######################
+#Global Configuration#
 mysql_user: hackazon
 mysql_password: default
-
-mysql_host: localhost
 hackazon_password: default
 #git only
 hackazon_repo: https://github.com/ianwijaya/hackazon
@@ -10,11 +10,17 @@ hackazon_repo: https://github.com/ianwijaya/hackazon
 server_name: myhackazon.lc
 db_name: hackazon
 
+#######################
+#on-prem Configuration#
+#mysql_host is valid only for on-prem configuration. This value gets overriden with dynamic inventory IP in public cloud deployment.
+#change to DB IP address if it's not deployed inside web svr
+mysql_host: localhost
+
+#######################
+#AZURE Configuration#
 desired_web_instance: 1
 #where desired_web_instance > 1 and local_db = yes, DB will be deployed on the first web instance.
 local_db: 'no' # 'no' means using separate db svr
-
-#AZURE Configuration#
 az_rg: hackazon_rg
 az_loc: southeastasia
 virtual_network: 10.128.10.0/23
@@ -23,6 +29,5 @@ ssh_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD2131QQDFDKkc1DgQ2131QQDFDKkc1Dg
 admin_password: VeryDirty$ecret #use strong password, 12 char, contain special char and capital
 #pick a globally unique account, all with lower case and no special character
 storage_account: veryuniqueaccount #even this unique sample is not unique
-
 #watermark all products images. used for load balancing POC with multiple web instance
 image_watermark: 'yes'
