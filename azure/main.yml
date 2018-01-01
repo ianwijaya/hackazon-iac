@@ -8,6 +8,7 @@
     - include_tasks: azure-db-res-creation.yml
       when: local_db=='no'
     - include_tasks: azure-ws-res-creation.yml
+    - include_tasks: azure-waap-res-creation.yml
     - meta: refresh_inventory
     - debug: var=hostvars[inventory_hostname]
 # dynamic inventory
@@ -53,3 +54,20 @@
       when: local_db=='no'
     - debug: var=mysql_host
     - include_tasks: hackazon-websvr.yml
+
+- hosts: localhost
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  environment:
+    F5_USER: '{{ admin_username }}'
+    F5_PASSWORD: '{{ admin_password }}'
+    F5_SERVER:  "{{ hostvars['localhost']['f5_host']}}"
+    F5_SERVER_PORT: '8443'
+    F5_VALIDATE_CERTS: 'no'
+  tasks:
+   - set_fact:
+      web_res_output: "{{ hostvars['localhost']['web_res_output'] }}"
+   - include_tasks: hackazon-f5waap.yml

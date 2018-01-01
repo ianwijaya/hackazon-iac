@@ -1,8 +1,3 @@
-- hosts: 'localhost'
-  gather_facts: no
-  vars_files:
-    - vars.yml
-  tasks:
   - name: deploy F5 WAAP thru ARM template
     azure_rm_deployment:
        state: present
@@ -11,19 +6,19 @@
        template_link: https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/supported/standalone/1nic/existing_stack/PAYG/azuredeploy.json
        parameters:
           adminUsername:
-              value: f5admin
+              value: "{{ admin_username }}"
           adminPassword:
               value: "{{ admin_password }}"
           dnsLabel:
-              value: "f5waap"
+              value: '{{ f5_instance_name }}'
           instanceName:
-              value: "f5waap"
+              value: '{{ f5_instance_name }}'
           instanceType:
               value: "Standard_DS2_v2"
           imageName:
               value: "Best"
           bigIpVersion:
-              value: "13.0.0300"
+              value: "{{ f5_sw_version }}"
           licensedBandwidth:
               value: "25m"
           vnetName:
@@ -33,16 +28,27 @@
           mgmtSubnetName:
               value: "hackazon_subnet"
           mgmtIpAddress:
-              value: "10.128.10.245"
+              value: "{{ f5_self_addr }}"
           avSetChoice:
               value: "CREATE_NEW"
           ntpServer:
               value: "0.pool.ntp.org"
           timeZone:
-              value: "GMT+7"
+              value: "{{ timezone }}"
           restrictedSrcAddress:
               value: "*"
+          tagValues:
+              value:
+                 Name: '{{ f5_instance_name }}'
+                 Type: 'f5'
+                 application: 'APP'
+                 cost: 'COST'
+                 environment: 'ENV'
+                 group: 'GROUP'
+                 owner: 'OWNER'
           allowUsageAnalytics:
               value: "Yes"
-    register: azurewaap
-  - debug : var=azurewaap
+    register: f5waap_res_output
+  - debug: var=f5waap_res_output
+  - set_fact:
+      f5_host: "{{ f5waap_res_output.deployment.instances[0].ips[0].public_ip }}"

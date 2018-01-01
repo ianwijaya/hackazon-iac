@@ -1,0 +1,89 @@
+    - name: install f5-sdk
+      local_action: shell pip install f5-sdk bigsuds
+    - name: provision BIG-IP
+      bigip_provision:
+        module: "{{ item }}"
+        level: nominal
+        state: present
+      with_items:
+        - asm
+        - ltm
+        - avr
+    - name: configure self ip if not exist
+      bigip_selfip:
+        name: 'self_1nic'
+        address: '{{ f5_self_addr }}'
+        netmask: '255.255.255.0'
+        vlan: 'internal'
+        state: present
+        allow_service: default
+    - name: create app monitor for hackazon
+      bigip_monitor_http:
+        name: hackazon_http_monitor
+        state: present
+        send: "GET / HTTP/1.1\\r\\nhost: {{ server_name }}\\r\\n\\r\\n"
+        receive: "200 OK"
+    - name: create hackazon svr pool
+      bigip_pool:
+        name: pool_hackazon
+        state: present
+        lb_method: "fastest-app-response"
+        monitor_type: and_list
+        monitors: hackazon_http_monitor
+    - name: add member to pool_hackazon
+      bigip_pool_member:
+        pool: pool_hackazon
+        host: "{{ item.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"
+        port: 80
+        state: 'present'
+      with_items:
+        - "{{ web_res_output.results }}"
+
+    - name: enable insert x-forwarded-for
+      bigip_command:
+        commands: modify ltm profile http http insert-xforwarded-for enabled
+
+    - name: create hackazon VS
+      bigip_virtual_server:
+        name: vs_hackazon_https
+        destination: '{{ f5_self_addr }}'
+        port: 443
+        pool: pool_hackazon
+        snat: Automap
+        description: Hackazon virtual server
+        all_profiles:
+          - tcp
+          - http
+          - clientssl
+
+    - name: create hackazon HTTP REDIRECT VS
+      bigip_virtual_server:
+        name: vs_hackazon_redir_http
+        destination: '{{ f5_self_addr }}'
+        port: 80
+        description: Hackazon redirect virtual server
+        all_profiles:
+          - tcp
+          - http
+        all_rules:
+          - _sys_https_redirect
+
+    - name: Add 80 and 443 rules to F5 WAAP security group
+      become: no
+      azure_rm_securitygroup:
+        resource_group: '{{ az_rg }}'
+        name: "{{ f5_instance_name }}-mgmt-nsg"
+        rules:
+         - name: 'http'
+           protocol: Tcp
+           destination_port_range: '80'
+           access: Allow
+           direction: Inbound
+           priority: '103'
+         - name: 'https'
+           protocol: Tcp
+           destination_port_range: '443'
+           access: Allow
+           direction: Inbound
+           priority: '104'
+  

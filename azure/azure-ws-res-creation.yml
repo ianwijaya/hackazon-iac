@@ -44,7 +44,7 @@
        resource_group: '{{ az_rg }}'
        name: 'websvr{{ item }}'
        vm_size: Basic_A0
-       admin_username: ansible
+       admin_username: '{{ admin_username }}'
        admin_password: '{{ admin_password }}'
        storage_account: '{{ storage_account }}'
        ssh_password_enabled: True
@@ -61,5 +61,5 @@
         publisher: 'Canonical'
         sku: '16.04-LTS'
         version: 'latest'
-    register: "vm_output_web_{{ item }}"
+    register: "web_res_output"
     with_sequence: start=1 end={{ desired_web_instance }} stride=1

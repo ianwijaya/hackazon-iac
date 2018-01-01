@@ -35,7 +35,7 @@
        resource_group: '{{ az_rg }}'
        name: dbsvr
        vm_size: Basic_A0
-       admin_username: ansible
+       admin_username: '{{ admin_username }}'
        admin_password: '{{ admin_password }}'
        storage_account: '{{ storage_account }}'
        ssh_password_enabled: True
@@ -50,7 +50,7 @@
         publisher: 'Canonical'
         sku: '16.04-LTS'
         version: 'latest'
-    register: output
+    register: db_res_output
   - set_fact:
-        mysql_host: "{{ output.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"
+        mysql_host: "{{ db_res_output.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"
   - debug: var=mysql_host

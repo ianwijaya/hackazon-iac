@@ -69,6 +69,9 @@ There are 4 parameters need to be supplied:
 
 Don't forget to add your apps to a role by navigating to Subscription  -> IAM -> Add -> Role : Contributor, then type your app name on select box, then hit save.
 
+F5 WAAP items also need to be enabled for programmatic deployment. You need to acknowledge the subscription terms.
+To do this, search "F5" in the marketplace, choose "F5 BIG-IP ADC+SEC BEST 25M Hourly" and click the link "want to deploy programmatically ?" hit enable and save.  
+
 ```
 [default]
 client_id=xxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx
@@ -79,7 +82,7 @@ subscription_id=xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx
 
 Save it to "~/.azure/credentials" (it has to be in home directory, pls create if it doesn't exist).
 
-Refer to this for more detail explanation: 
+Refer to this for more detail explanation:
 https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
 
 ### Installing
