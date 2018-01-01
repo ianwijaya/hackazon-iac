@@ -16,6 +16,7 @@ desired_web_instance: 3
 local_db: 'no' # 'no' means using separate db svr
 
 #AZURE Configuration#
+#pls use non-production resource_group. destroy-svr.yml will delete all resource under this RG. 
 az_rg: hackazon_rg
 az_loc: southeastasia
 virtual_network: 10.128.10.0/23
