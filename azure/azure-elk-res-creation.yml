@@ -1,8 +1,8 @@
---- #deploy db server
-  - name: Create DB Svr Security Groups
+--- #deploy web servers
+  - name: Create ELK Svr Security Groups
     azure_rm_securitygroup:
       resource_group: '{{ az_rg }}'
-      name: hackazon_db_sg
+      name: hackazon_elk_sg
       rules:
        - name: 'ssh'
          protocol: Tcp
@@ -10,46 +10,54 @@
          access: Allow
          direction: Inbound
          priority: '1001'
-       - name: 'mysql'
-         protocol: Tcp
+       - name: 'log-listener'
+         protocol: '*'
          source_address_prefix: '{{ svr_subnet }}'
-         destination_port_range: '3306'
+         destination_port_range: '5000'
          access: Allow
          direction: Inbound
          priority: '1002'
-  - name: Create Public IP for Mgmt
+       - name: 'kibana'
+         protocol: Tcp
+         source_address_prefix: '{{ svr_subnet }}'
+         destination_port_range: '5601'
+         access: Allow
+         direction: Inbound
+         priority: '1003'
+  - name: Create public IP
     azure_rm_publicipaddress:
-       resource_group: '{{ az_rg }}'
-       allocation_method: Static
-       name: 'hackazon_db_pub_ip'
+      resource_group: '{{ az_rg }}'
+      allocation_method: Static
+      name: 'hackazon_elk_pub_ip'
   - name: Create NIC
     azure_rm_networkinterface:
        resource_group: '{{ az_rg }}'
-       name: hackazon_db_nic_1
+       name: 'hackazon_elk_nic'
        virtual_network: hackazon_vn
        subnet: hackazon_subnet
-       security_group: hackazon_db_sg
-       public_ip_name: hackazon_db_pub_ip
-  - name: Create DB VM
+       public_ip_name: 'hackazon_elk_pub_ip'
+       security_group: hackazon_elk_sg
+  - name: Create ELK VM
     azure_rm_virtualmachine:
        resource_group: '{{ az_rg }}'
-       name: dbsvr
-       vm_size: Basic_A0
+       name: 'elksvr'
+       vm_size: "Standard_D2_v3"
        admin_username: '{{ admin_username }}'
        admin_password: '{{ admin_password }}'
        storage_account: '{{ storage_account }}'
        ssh_password_enabled: True
+       short_hostname: 'az-elksvr'
        ssh_public_keys:
         - path: /home/ansible/.ssh/authorized_keys
           key_data: '{{ ssh_key }}'
-       network_interfaces: hackazon_db_nic_1
+       network_interfaces: 'hackazon_elk_nic'
        tags:
-          Type: 'dbsvr'
+          Type: 'elksvr'
        image:
         offer: 'UbuntuServer'
         publisher: 'Canonical'
         sku: '16.04-LTS'
         version: 'latest'
-    register: db_res_output
+    register: elk_res_output
   - set_fact:
-        mysql_host: "{{ db_res_output.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"
+      elk_host: "{{ elk_res_output.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"

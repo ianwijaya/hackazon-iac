@@ -2,15 +2,15 @@
 - hosts: 'localhost'
   gather_facts: no
   vars_files:
-    - vars.yml
+    - ../vars.yml
   tasks:
     - include_tasks: azure-env-res-creation.yml
     - include_tasks: azure-db-res-creation.yml
       when: local_db=='no'
     - include_tasks: azure-ws-res-creation.yml
     - include_tasks: azure-waap-res-creation.yml
+    - include_tasks: azure-elk-res-creation.yml
     - meta: refresh_inventory
-    - debug: var=hostvars[inventory_hostname]
 # dynamic inventory
 # DB server deployment
 - hosts: Type_dbsvr
@@ -19,10 +19,11 @@
   become_method: sudo
   connection: ssh
   gather_facts: no
+  strategy: free
   vars_files:
-    - vars.yml
+    - ../vars.yml
   tasks:
-    - include_tasks: hackazon-dbsvr.yml
+    - include_tasks: ../hackazon-dbsvr.yml
       when: local_db=='no'
 
 
@@ -32,10 +33,11 @@
   become_method: sudo
   connection: ssh
   gather_facts: no
+  strategy: free
   vars_files:
-   - vars.yml
+   - ../vars.yml
   tasks:
-  - include_tasks: hackazon-dbsvr.yml
+  - include_tasks: ../hackazon-dbsvr.yml
     when: local_db=='yes'
 
 
@@ -46,21 +48,34 @@
   become_method: sudo
   connection: ssh
   gather_facts: no
+  strategy: free
   vars_files:
-    - vars.yml
+    - ../vars.yml
   tasks:
     - set_fact: #override vars_files variables only for Azure deployment.
         mysql_host: "{{ hostvars['localhost']['mysql_host'] }}"
       when: local_db=='no'
     - debug: var=mysql_host
-    - include_tasks: hackazon-websvr.yml
+    - include_tasks: ../hackazon-websvr.yml
+
+- hosts: Type_elksvr
+  remote_user: ansible
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: no
+  strategy: free
+  vars_files:
+    - ../vars.yml
+  tasks:
+  - include_tasks: ../hackazon-elksvr.yml
 
 - hosts: localhost
   become: yes
   become_method: sudo
   gather_facts: no
   vars_files:
-    - vars.yml
+    - ../vars.yml
   environment:
     F5_USER: '{{ admin_username }}'
     F5_PASSWORD: '{{ admin_password }}'
@@ -68,6 +83,14 @@
     F5_SERVER_PORT: '8443'
     F5_VALIDATE_CERTS: 'no'
   tasks:
-   - set_fact:
-      web_res_output: "{{ hostvars['localhost']['web_res_output'] }}"
-   - include_tasks: hackazon-f5waap.yml
+   - set_fact: #override vars_files elk variables only for Azure deployment.
+       ws_host: "{{ hostvars['localhost']['ws_host'] }}"
+       elk_host: "{{ hostvars['localhost']['elk_host'] }}"
+   - include_tasks: ../hackazon-f5waap.yml
+   - debug:
+        msg:
+          - "Playbook is complete"
+          - "Please add {{ server_name }} {{ hostvars['localhost']['f5_host']}} to your hostfile/DNS"
+          - "Hackazon App: https://{{ server_name }}"
+          - "F5 WAAP GUI: https://{{ server_name }}:8443"
+          - "Kibana GUI: https://{{ server_name }}:5601"

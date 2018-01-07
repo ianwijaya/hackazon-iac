@@ -2,7 +2,7 @@
 # Automated Hackazon and F5 WAAP Deployment with Ansible
 Deploying Hackazon and F5 WAAP in Multi-Cloud Environment
 
-## What is this
+## Intro
 
 Hackazon is modern vulnerable web application. Just like many web and mobile applications as well as web services, most of them are not being adequately tested for security vulnerabilities. Wherever the apps may move, these vulnerabilities will also follow.
 F5 WAAP is one of the popular and fastest solution to patch and protect these vulnerabilities.
@@ -15,28 +15,72 @@ This repository shows:
 This repo contains Ansible script to deploy just that.
 
 ### Prerequisites
-You need 1 machine as Ansible control host (this can be your computer or another server)
+You need 1 machine as Ansible control/mgmt node (this can be your computer or another server).
+Mgmt-node:
+Operating system: Ubuntu-16.04
+On mgmt node:
 
-Debian
+- Install Ansible version 2.5.0
 ```
-$sudo apt-add-repository ppa:ansible/ansible
-$sudo apt-get update
-$sudo apt-get ansible
+pip install git+https://github.com/ansible/ansible.git@devel
 ```
-
-RedHat
+- Install openssh-server
 ```
-RPM doc goes here.
+sudo apt-get update
+sudo apt-get install openssh-server
 ```
-
-Open /etc/ansible/ansible.cfg and enable this line to avoid server ssh prompt:
+- Create new user ('ansible') and new SSH key
+```
+sudo adduser ansible
+su - ansible
+ssh-keygen
+```
+- Copy SSH key to localhost:
+```
+ssh-copy-id ansible@localhost
+```
+- Open /etc/ansible/ansible.cfg and enable this line to avoid server ssh prompt:
 ```
 host_key_checking = False
 ```
+- Allow "ansible" to sudo without password to localhost:
+```
+sudo visudo
+```
+then append this configuration:
+```
+ansible  ALL=(ALL:ALL) NOPASSWD:ALL
+```
 
 #### On-prem
-At the moment, we focus on configuration mgmt for on-prem svr. Svr and WAAP has to be spun up in advanced.
-1. Configure /etc/ansible/hosts (! for public cloud deployment, you don't need to configure this)
+At the moment, we focus on configuration mgmt for on-prem svr. All components have to be provisioned in advance.
+1. On all managed nodes:
+- Create user "ansible"
+```
+sudo adduser ansible
+```
+- Install openssh-server
+```
+sudo apt-get update
+sudo apt-get install openssh-server
+```
+- Allow "ansible" to sudo without password
+```
+sudo visudo
+```
+then append this configuration
+```
+ansible  ALL=(ALL:ALL) NOPASSWD:ALL
+```
+Save it (write out)
+
+2. On mgmt node:
+- Copy SSH key to all servers
+```
+su - ansible
+ssh-copy-id ansible@<all-nodes-ip>
+```
+- Configure /etc/ansible/hosts
 All IPs has to be reachable from control host
 ```
 [webservers]   
@@ -44,19 +88,23 @@ All IPs has to be reachable from control host
 <your webserver2 IP goes here>
 
 [dbservers]
-<your dbsvr IP goes here> #this can be same websvr IP
+<your dbsvr IP goes here> #this can be same as websvr IP
+
+[elkservers]
+<your elksvr IP goes here>
+
 ```
 
-2. Modify vars.yml. You only need to change "Global" and "On-prem" configuration section. "mysql_host" need to be changed to DB IP if DB and Web are not installed on the same server.
+3. Modify vars.yml. You only need to change "Global" and "On-prem" configuration section. "mysql_host" need to be changed to DB IP if DB and Web are not installed on the same server.
 
-3. Play it
+4. Play it
 ```
 $cd hackazon-iac/
-$ansible-playbook -i all main.yml
+$ansible-playbook main.yml
 ```
 
 #### Azure (Azure Folder)
-Credentials need to be provided. While there are many ways to do this, we're gonna use AD app and service principal ID.
+1. Credentials need to be provided. While there are many ways to do this, we're gonna use AD app and service principal ID.
 There are 4 parameters need to be supplied:
 
 -client_id: Azure portal -> Azure Active Directory -> App Registration -> New (choose Web/API and enter arbitrary sing-on URL) -> copy application ID and use it as client_id
@@ -69,9 +117,6 @@ There are 4 parameters need to be supplied:
 
 Don't forget to add your apps to a role by navigating to Subscription  -> IAM -> Add -> Role : Contributor, then type your app name on select box, then hit save.
 
-F5 WAAP items also need to be enabled for programmatic deployment. You need to acknowledge the subscription terms.
-To do this, search "F5" in the marketplace, choose "F5 BIG-IP ADC+SEC BEST 25M Hourly" and click the link "want to deploy programmatically ?" hit enable and save.  
-
 ```
 [default]
 client_id=xxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx
@@ -81,40 +126,38 @@ subscription_id=xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx
 ```
 
 Save it to "~/.azure/credentials" (it has to be in home directory, pls create if it doesn't exist).
-
 Refer to this for more detail explanation:
 https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
 
-### Installing
+2. F5 WAAP items also need to be enabled for programmatic deployment. You need to acknowledge the subscription terms.
+To do this, search "F5" in the marketplace, choose "F5 BIG-IP ADC+SEC BEST 25M Hourly" and click the link "want to deploy programmatically ?" hit enable and save.  
 
-A step by step series of examples that tell you have to get a development env running
-e
 
+3. Edit vars.yml
+Open vars.yml, and change these parameters:
+ssh_key -> cat .ssh/id_rsa.pub -> copy the newly generated ssh pub key to this var
+admin_username: ansible -> change if you want
+admin_password: -> give the username a password
+storage_account: -> must be unique ID (pick a unique string), all with lower case and no special character
+
+4. Play it
 ```
-Give the example
+$cd hackazon-iac/azure
+$ansible-playbook -i azure_rm.py main.yml
 ```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Deployment
+### Topology
+![Lab Topology](https://raw.githubusercontent.com/ianwijaya/hackazon-iac/master/README/lab-topology.png)
 
 ## Built With
 
 * Ansible
 * Atom
 * Ubuntu
-* AZURE
-* AWS
-
-## Contributing
-
-Please read for details on our code of conduct, and the process for submitting pull requests to us. [TBD]
+* Azure
+* Maxmind (GeoLite)
+* Hackazon
+* F5
+* ELK
 
 ## Versioning
 
@@ -122,11 +165,8 @@ Devel 1.0.0
 
 ## Authors
 
+wijaya.ian@gmail.com
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hackazon

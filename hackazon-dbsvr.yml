@@ -1,4 +1,7 @@
---- #deploy web server
+--- #deploy db server
+  - name: set timezone
+    timezone:
+      name: '{{ tzname }}'
   - name: set mysql passwd
     debconf:
       name: 'mysql-server'

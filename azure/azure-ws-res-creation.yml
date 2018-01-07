@@ -61,5 +61,9 @@
         publisher: 'Canonical'
         sku: '16.04-LTS'
         version: 'latest'
-    register: "web_res_output"
+    register: "web_res_outputs"
     with_sequence: start=1 end={{ desired_web_instance }} stride=1
+  - set_fact: ws_host=[]
+  - set_fact: ws_host="{{ ws_host }} + [ '{{ item.ansible_facts.azure_vm.properties.networkProfile.networkInterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}' ]"
+    with_items: "{{ web_res_outputs.results }}"
+  - debug: msg='{{ ws_host }}'

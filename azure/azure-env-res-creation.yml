@@ -1,3 +1,4 @@
+
   - name: create Resource Group
     azure_rm_resourcegroup:
       name: '{{ az_rg }}'
@@ -19,7 +20,7 @@
       virtual_network: hackazon_vn
       name: hackazon_subnet
       address_prefix: '{{ svr_subnet }}'
-      
+
   - name: create storage account
     azure_rm_storageaccount:
        resource_group: '{{ az_rg }}'

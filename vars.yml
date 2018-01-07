@@ -2,8 +2,12 @@
 mysql_user: hackazon
 mysql_password: default
 
-#mysql host will be overriden for Azure deployment
+#all host info will be overriden for Azure deployment
 mysql_host: localhost
+elk_host: '10.128.10.8'
+ws_host: ['10.128.10.3', '10.128.10.4', '10.128.10.6']
+
+
 hackazon_password: default
 #git only, this repo already contains watermark.php. if you use other repo, pls disables 'image_watermark'
 hackazon_repo: https://github.com/ianwijaya/hackazon
@@ -15,22 +19,27 @@ desired_web_instance: 3
 #where desired_web_instance > 1 and local_db = yes, DB will be deployed on the first web instance.
 local_db: 'no' # 'no' means using separate db svr
 
+
+
 #AZURE Configuration#
-#pls use non-production resource_group. destroy-svr.yml will delete all resource under this RG. 
+#pls use non-production resource_group. destroy-svr.yml will delete all resource under this RG.
 az_rg: hackazon_rg
 az_loc: southeastasia
 virtual_network: 10.128.10.0/23
 svr_subnet: 10.128.10.0/24
-ssh_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD2131QQDFDKkc1DgQ2131QQDFDKkc1DgQOHiUYoTQxD7m12CJCXBacyFsZf/+Mn5k0bDKic2P9Cd2131QQDFDKkc1DgQQ14b+qzrNCC2/jcXGWN269lStMSVByhjBp2131QQDFDKkc1DgQQ14bvHcwIWG7ODADrBohU7I5d8qhDmZM8rIFOlRGGKZjua5iKZPbpDzw2131QQDFDKkc1DgQQ14bJrXLtpBWUCGApQvqnFpAiVzOi2131QQDFDKkc1DgQQ14bxdnxxDc87KByv3L+T3xk5qYhjSy2m2131QQDFDKkc1DgQQ14bVNFYAYWaZZ ansible@master'
+ssh_key: 'ssh-rsa AAAAB3NzaCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQxD7m12CJCXBacyFsZf/+Mn5k0bDKic2P9Cdj1IwrD2OvMw72CfyqCVUF773jQ14b+qzrNCC2/jcXGWN269lStMSVByhjBpWV4y/avqBfv5hyyIuXFvHcwIWG7ODADrBohU7I5d8qhDmZM8rIFOlRGGKZjua5iKZPbpDzwNCRBEMZgOW/sR1eReqOYhJrXLtpBWUCGApQvqnFpAiVzOi1ZkzBXNv7EojBygOZBX14baxdnxxDc87KByv3L+T3xk5qYhjSy2mv7oaatikb1GJr75PZaASf63GGxVNFYAYWaZZ ansible@master'
 admin_username: ansible
-admin_password: VeryDirty$ecret #use strong password, 12 char, contain special char and capital
+admin_password: veryDirtySecret! #use strong password, 12 char, contain special char and capital
 #pick a globally unique account, all with lower case and no special character
-storage_account: veryuniqueaccount #even this unique sample is not unique
+storage_account: veryuniqueaccount
+
 #watermark all products images. used for load balancing POC with multiple web instance
 image_watermark: 'yes'
 
 #F5 WAAP configurations
 f5_self_addr: 10.128.10.245
+svr_subnet_gw: 10.128.10.1
 timezone: 'GMT+7'
+tzname: 'Asia/Jakarta'
 f5_sw_version: "13.0.0300"
 f5_instance_name: 'f5waap'

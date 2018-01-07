@@ -1,3 +1,4 @@
+
   - name: deploy F5 WAAP thru ARM template
     azure_rm_deployment:
        state: present
@@ -49,6 +50,29 @@
           allowUsageAnalytics:
               value: "Yes"
     register: f5waap_res_output
-  - debug: var=f5waap_res_output
   - set_fact:
       f5_host: "{{ f5waap_res_output.deployment.instances[0].ips[0].public_ip }}"
+  - name: Add 80, 443, and 5601 rules to F5 WAAP security group
+    become: no
+    azure_rm_securitygroup:
+      resource_group: '{{ az_rg }}'
+      name: "{{ f5_instance_name }}-mgmt-nsg"
+      rules:
+       - name: 'http'
+         protocol: Tcp
+         destination_port_range: '80'
+         access: Allow
+         direction: Inbound
+         priority: '103'
+       - name: 'https'
+         protocol: Tcp
+         destination_port_range: '443'
+         access: Allow
+         direction: Inbound
+         priority: '104'
+       - name: 'elk'
+         protocol: Tcp
+         destination_port_range: '5601'
+         access: Allow
+         direction: Inbound
+         priority: '105'

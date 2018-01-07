@@ -1,4 +1,7 @@
 --- #deploy web server
+  - name: set timezone
+    timezone:
+      name: '{{ tzname }}'
   - name: add php 5.6 repository
     apt_repository:
       repo: 'ppa:ondrej/php'
@@ -17,6 +20,13 @@
       - php5.6-mbstring
       - php5.6-imagick
       - libapache2-mod-php5.6
+  - name: uninstall some bins
+    apt:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+      - runit
+      - git-daemon-run
   - name: install supporting bins
     apt:
       name: "{{ item }}"
@@ -41,8 +51,12 @@
   - name: create symlink of virtual host configuration
     file: src=/etc/apache2/sites-available/010-hackazon.conf  dest=/etc/apache2/sites-enabled/010-hackazon.conf state=link
   - name: change owner of hackazon directory
-    command: "chown -R www-data:www-data /var/www/hackazon"
-    changed_when: false
+    file:
+      path: /var/www/hackazon
+      state: directory
+      owner: www-data
+      group: www-data
+      recurse: yes
   - name: run php composer
     shell: 'php composer.phar install -o --prefer-dist'
     args:
@@ -60,7 +74,7 @@
       owner: www-data
       group: www-data
     when: image_watermark=='yes'
-  - name: add watermark htaccess configuration
+  - name: add non watermark htaccess configuration
     template:
       src: templates/apache/htaccess-nowm.conf
       dest: /var/www/hackazon/web/.htaccess
