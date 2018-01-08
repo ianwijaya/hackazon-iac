@@ -48,7 +48,7 @@
        ssh_password_enabled: True
        short_hostname: 'az-elksvr'
        ssh_public_keys:
-        - path: /home/ansible/.ssh/authorized_keys
+        - path: '/home/{{ admin_username }}/.ssh/authorized_keys'
           key_data: '{{ ssh_key }}'
        network_interfaces: 'hackazon_elk_nic'
        tags:

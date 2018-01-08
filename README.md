@@ -104,7 +104,12 @@ $ansible-playbook main.yml
 ```
 
 #### Azure (Azure Folder)
-1. Credentials need to be provided. While there are many ways to do this, we're gonna use AD app and service principal ID.
+1. Install ansible[azure]
+```
+pip install ansible[azure]
+```
+
+2. Credentials need to be provided. While there are many ways to do this, we're gonna use AD app and service principal ID.
 There are 4 parameters need to be supplied:
 
 -client_id: Azure portal -> Azure Active Directory -> App Registration -> New (choose Web/API and enter arbitrary sing-on URL) -> copy application ID and use it as client_id
@@ -129,18 +134,23 @@ Save it to "~/.azure/credentials" (it has to be in home directory, pls create if
 Refer to this for more detail explanation:
 https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
 
-2. F5 WAAP items also need to be enabled for programmatic deployment. You need to acknowledge the subscription terms.
+3. F5 WAAP items also need to be enabled for programmatic deployment. You need to acknowledge the subscription terms.
 To do this, search "F5" in the marketplace, choose "F5 BIG-IP ADC+SEC BEST 25M Hourly" and click the link "want to deploy programmatically ?" hit enable and save.  
 
 
-3. Edit vars.yml
+4. Edit vars.yml
 Open vars.yml, and change these parameters:
-ssh_key -> cat .ssh/id_rsa.pub -> copy the newly generated ssh pub key to this var
-admin_username: ansible -> change if you want
-admin_password: -> give the username a password
-storage_account: -> must be unique ID (pick a unique string), all with lower case and no special character
+- ssh_key -> cat .ssh/id_rsa.pub -> copy the newly generated ssh pub key to this var
 
-4. Play it
+- admin_username: ansible -> change if you want
+
+- admin_password: -> give the username a password
+
+- storage_account: -> must be unique ID (pick a unique string), all with lower case and no special character
+
+- f5_instance_name: -> pick something unique
+
+5. Play it
 ```
 $cd hackazon-iac/azure
 $ansible-playbook -i azure_rm.py main.yml

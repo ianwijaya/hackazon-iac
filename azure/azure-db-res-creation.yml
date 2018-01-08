@@ -40,7 +40,7 @@
        storage_account: '{{ storage_account }}'
        ssh_password_enabled: True
        ssh_public_keys:
-        - path: /home/ansible/.ssh/authorized_keys
+        - path: '/home/{{ admin_username }}/.ssh/authorized_keys'
           key_data: '{{ ssh_key }}'
        network_interfaces: hackazon_db_nic_1
        tags:
