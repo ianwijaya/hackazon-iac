@@ -15,7 +15,7 @@ hackazon_repo: https://github.com/ianwijaya/hackazon
 server_name: myhackazon.lc
 db_name: hackazon
 
-desired_web_instance: 3
+desired_web_instance: 2
 #where desired_web_instance > 1 and local_db = yes, DB will be deployed on the first web instance.
 local_db: 'no' # 'no' means using separate db svr
 
@@ -23,22 +23,25 @@ local_db: 'no' # 'no' means using separate db svr
 
 #AZURE Configuration#
 #pls use non-production resource_group. destroy-svr.yml will delete all resource under this RG.
-az_rg: hackazon_rg
-az_loc: southeastasia
-virtual_network: 10.128.10.0/23
-svr_subnet: 10.128.10.0/24
+
+#az_rg: hackazon_rg
+namespace: myhkz
+azure_location: southeastasia
+virtual_network: 10.20.2.0/23
+svr_subnet: 10.20.2.0/24
 ssh_key: 'ssh-rsa AAAAB3NzaCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQxD7m1YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYADrBohU7I5d8qhDmZM8rIFOlRGGKZjua5iKZPbpDzwNCRBEMZgOW/sR1eReqOYhJrXLtpBWUCGApQvqnFpAiVzOi1ZkzBXNv7EojBygOZBX14baxdnZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZNFYAYWaZZ ansible@master'
 admin_username: ansible
 admin_password: veryDirtySecret! #use strong password, 12 char, contain special char and capital
 #pick a globally unique account, all with lower case and no special character
 storage_account: veryuniqueaccount
+owner: 'Your Name'
 
 #watermark all products images. used for load balancing POC with multiple web instance
 image_watermark: 'yes'
 
 #F5 WAAP configurations
-f5_self_addr: 10.128.10.245
-svr_subnet_gw: 10.128.10.1
+f5_self_addr: 10.20.2.245
+svr_subnet_gw: 10.20.2.1
 timezone: 'GMT+7'
 tzname: 'Asia/Jakarta'
 f5_sw_version: "13.0.0300"

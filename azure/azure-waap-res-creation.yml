@@ -2,8 +2,8 @@
   - name: deploy F5 WAAP thru ARM template
     azure_rm_deployment:
        state: present
-       resource_group_name: '{{ az_rg }}'
-       location: '{{ az_loc }}'
+       resource_group_name: '{{ namespace }}'
+       location: '{{ azure_location }}'
        template_link: https://raw.githubusercontent.com/F5Networks/f5-azure-arm-templates/master/supported/standalone/1nic/existing_stack/PAYG/azuredeploy.json
        parameters:
           adminUsername:
@@ -11,9 +11,9 @@
           adminPassword:
               value: "{{ admin_password }}"
           dnsLabel:
-              value: '{{ f5_instance_name }}'
+              value: '{{ namespace }}-{{ f5_instance_name }}'
           instanceName:
-              value: '{{ f5_instance_name }}'
+              value: '{{ namespace }}-{{ f5_instance_name }}'
           instanceType:
               value: "Standard_DS2_v2"
           imageName:
@@ -23,11 +23,11 @@
           licensedBandwidth:
               value: "25m"
           vnetName:
-              value: "hackazon_vn"
+              value: "{{ namespace }}_vn"
           vnetResourceGroupName:
-              value: "{{ az_rg }}"
+              value: "{{ namespace }}"
           mgmtSubnetName:
-              value: "hackazon_subnet"
+              value: "{{ namespace }}_subnet"
           mgmtIpAddress:
               value: "{{ f5_self_addr }}"
           avSetChoice:
@@ -40,7 +40,7 @@
               value: "*"
           tagValues:
               value:
-                 Name: '{{ f5_instance_name }}'
+                 Name: '{{ namespace }}-{{ f5_instance_name }}'
                  Type: 'f5'
                  application: 'APP'
                  cost: 'COST'
@@ -55,8 +55,8 @@
   - name: Add 80, 443, and 5601 rules to F5 WAAP security group
     become: no
     azure_rm_securitygroup:
-      resource_group: '{{ az_rg }}'
-      name: "{{ f5_instance_name }}-mgmt-nsg"
+      resource_group: '{{ namespace }}'
+      name: "{{namespace}}-{{ f5_instance_name }}-mgmt-nsg"
       rules:
        - name: 'http'
          protocol: Tcp

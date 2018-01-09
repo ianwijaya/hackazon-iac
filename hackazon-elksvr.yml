@@ -79,11 +79,11 @@
 
   - name: Download ES mapping from repository
     get_url:
-      url: https://raw.githubusercontent.com/ianwijaya/visualfae/master/es_template-asm-index.json
+      url: https://raw.githubusercontent.com/ianwijaya/visualfae/master/esv6_template-asm-index.json
       dest: /var/tmp/es_template-asm-index.json
 
   - name: Update logstash template
-    shell: 'curl -XPUT http://localhost:9200/_template/asm-index_template?pretty -d @/var/tmp/es_template-asm-index.json'
+    shell: 'curl -XPUT http://localhost:9200/_template/asm-index_template?pretty -d @/var/tmp/es_template-asm-index.json -H "Content-type: application/json"'
     args:
       warn: false
   - name: Create Kibana index pattern

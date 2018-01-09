@@ -1,8 +1,8 @@
 --- #deploy web servers
   - name: Create ELK Svr Security Groups
     azure_rm_securitygroup:
-      resource_group: '{{ az_rg }}'
-      name: hackazon_elk_sg
+      resource_group: '{{ namespace }}'
+      name: '{{ namespace }}_elk_sg'
       rules:
        - name: 'ssh'
          protocol: Tcp
@@ -26,21 +26,21 @@
          priority: '1003'
   - name: Create public IP
     azure_rm_publicipaddress:
-      resource_group: '{{ az_rg }}'
+      resource_group: '{{ namespace }}'
       allocation_method: Static
-      name: 'hackazon_elk_pub_ip'
+      name: '{{ namespace }}_elk_pub_ip'
   - name: Create NIC
     azure_rm_networkinterface:
-       resource_group: '{{ az_rg }}'
-       name: 'hackazon_elk_nic'
-       virtual_network: hackazon_vn
-       subnet: hackazon_subnet
-       public_ip_name: 'hackazon_elk_pub_ip'
-       security_group: hackazon_elk_sg
+       resource_group: '{{ namespace }}'
+       name: '{{ namespace }}_elk_nic'
+       virtual_network: '{{ namespace }}_vn'
+       subnet: '{{ namespace }}_subnet'
+       public_ip_name: '{{ namespace }}_elk_pub_ip'
+       security_group: '{{ namespace }}_elk_sg'
   - name: Create ELK VM
     azure_rm_virtualmachine:
-       resource_group: '{{ az_rg }}'
-       name: 'elksvr'
+       resource_group: '{{ namespace }}'
+       name: '{{ namespace }}-elksvr'
        vm_size: "Standard_D2_v3"
        admin_username: '{{ admin_username }}'
        admin_password: '{{ admin_password }}'
@@ -50,9 +50,9 @@
        ssh_public_keys:
         - path: '/home/{{ admin_username }}/.ssh/authorized_keys'
           key_data: '{{ ssh_key }}'
-       network_interfaces: 'hackazon_elk_nic'
+       network_interfaces: '{{ namespace }}_elk_nic'
        tags:
-          Type: 'elksvr'
+          Type: '{{ namespace }}-elksvr'
        image:
         offer: 'UbuntuServer'
         publisher: 'Canonical'

@@ -11,10 +11,13 @@
     - include_tasks: azure-waap-res-creation.yml
     - include_tasks: azure-elk-res-creation.yml
     - meta: refresh_inventory
+    - set_fact:
+       namespace: "{{ namespace }}"
+       admin_username: "{{ admin_username }}"
 # dynamic inventory
 # DB server deployment
-- hosts: Type_dbsvr
-  remote_user: ansible
+- hosts: "Type_{{ hostvars['localhost']['namespace'] }}-dbsvr"
+  remote_user: "{{ hostvars['localhost']['admin_username'] }}"
   become: yes
   become_method: sudo
   connection: ssh
@@ -27,8 +30,8 @@
       when: local_db=='no'
 
 
-- hosts: Enum_websvr1
-  remote_user: ansible
+- hosts: "Name_{{ hostvars['localhost']['namespace'] }}-websvr1"
+  remote_user: "{{ hostvars['localhost']['admin_username'] }}"
   become: yes
   become_method: sudo
   connection: ssh
@@ -42,8 +45,8 @@
 
 
 #Web Servers Deployment
-- hosts: Type_websvr
-  remote_user: ansible
+- hosts: "Type_{{ hostvars['localhost']['namespace'] }}-websvr"
+  remote_user: "{{ hostvars['localhost']['admin_username'] }}"
   become: yes
   become_method: sudo
   connection: ssh
@@ -58,8 +61,8 @@
     - debug: var=mysql_host
     - include_tasks: ../hackazon-websvr.yml
 
-- hosts: Type_elksvr
-  remote_user: ansible
+- hosts: "Type_{{ hostvars['localhost']['namespace'] }}-elksvr"
+  remote_user: "{{ hostvars['localhost']['admin_username'] }}"
   become: yes
   become_method: sudo
   connection: ssh
@@ -79,7 +82,7 @@
   environment:
     F5_USER: '{{ admin_username }}'
     F5_PASSWORD: '{{ admin_password }}'
-    F5_SERVER:  "{{ hostvars['localhost']['f5_host']}}"
+    F5_SERVER:  "{{ hostvars['localhost']['f5_host'] }}"
     F5_SERVER_PORT: '8443'
     F5_VALIDATE_CERTS: 'no'
   tasks:
