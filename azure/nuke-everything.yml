@@ -6,6 +6,6 @@
   tasks:
   - name: remove hackazon resource group
     azure_rm_resourcegroup:
-      name: '{{ az_rg }}'
+      name: '{{ namespace }}'
       state: absent
       force: yes
